@@ -14,10 +14,10 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
 
-df=pd.read_csv("input/nasd_input.csv",'\t').iloc[:,1:]
+df=pd.read_csv("input/nasd_input.csv",'\t',header=None).iloc[:,1:]
 
 print("Number of rows and columns:", df.shape)
-df.head(5)
+# df.head(5)
 
 training_set = df.iloc[:800, 1:2].values
 test_set = df.iloc[800:, 1:2].values
@@ -58,13 +58,13 @@ dataset_test = df.iloc[800:, 1:2]
 
 dataset_total = pd.concat((dataset_train, dataset_test), axis = 0)
 
-inputs = dataset_total[len(dataset_total) - len(dataset_test) - 60:].values
+inputs = dataset_total[len(dataset_total) - len(dataset_test) - 50:].values
 
 inputs = inputs.reshape(-1,1)
 inputs = sc.transform(inputs)
 X_test = []
-for i in range(60, 519):
-    X_test.append(inputs[i-60:i, 0])
+for i in range(50, 519):
+    X_test.append(inputs[i-50:i, 0])
 X_test = np.array(X_test)
 X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 
