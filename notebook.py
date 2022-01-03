@@ -14,6 +14,8 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
+# import os
+# os.environ['CUDA_VISIBLE_DEVICES'] = "0"
 
 # Parsing input parameters
 if len(sys.argv) >= 3 and sys.argv[1] == "-d":
@@ -30,23 +32,25 @@ all = True if len(sys.argv) > 5 and sys.argv[5] == "-all" else False
 
 
 df=pd.read_csv(dataset,'\t',header=None).iloc[:,1:]
-
-print("Number of rows and columns:", df.shape)
-# df.head(5)
-
-timeseries_num = 1
 training_num = math.ceil(len(df.columns)*0.8)
+print("Number of rows and columns:", df.shape)
+print(df.head(5))
 
-training_set = df.iloc[timeseries_num, :training_num].values
-test_set = df.iloc[timeseries_num, training_num:].values
+df=df.T
+df.insert(loc=0,column='dates',value=list(range(1,len(df.index)+1)))
+print(df)
+timeseries_num = 0
+
+training_set = df.iloc[:training_num, 1:2].values
+test_set = df.iloc[training_num:, 1:2].values
 
 # Feature Scaling
 sc = MinMaxScaler(feature_range = (0, 1))
-training_set_scaled = sc.fit_transform(training_set.reshape(-1, 1))# Creating a data structure with 50 time-steps and 1 output
+training_set_scaled = sc.fit_transform(training_set)# Creating a data structure with 60 time-steps and 1 output
 X_train = []
 y_train = []
-for i in range(50, training_num):
-    X_train.append(training_set_scaled[i-50:i, 0])
+for i in range(60, math.ceil(0.65*training_num)):
+    X_train.append(training_set_scaled[i-60:i, 0])
     y_train.append(training_set_scaled[i, 0])
 X_train, y_train = np.array(X_train), np.array(y_train)
 
@@ -68,23 +72,20 @@ model.add(Dense(units = 1))
 model.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
 # Fitting the RNN to the Training set
-model.fit(X_train, y_train, epochs = 10, batch_size = 32)
+model.fit(X_train, y_train, epochs = 1, batch_size = 32)
 
 # Getting the predicted stock price of 2017
-dataset_train = df.iloc[timeseries_num, :training_num]
-dataset_test = df.iloc[timeseries_num, training_num:]
+dataset_train = df.iloc[:training_num, 1:2]
+dataset_test = df.iloc[training_num:, 1:2]
 
 dataset_total = pd.concat((dataset_train, dataset_test), axis = 0)
 
-inputs = dataset_total[len(dataset_total) - len(dataset_test) - 50:].values
-
+inputs = dataset_total[len(dataset_total) - len(dataset_test) - 60:].values
 inputs = inputs.reshape(-1,1)
 inputs = sc.transform(inputs)
-print(inputs)
 X_test = []
-for i in range(50, 196):
-    X_test.append(inputs[i-50:i, 0])
-print(X_test)
+for i in range(60, 519):
+    X_test.append(inputs[i-60:i, 0])
 X_test = np.array(X_test)
 X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 
@@ -94,9 +95,11 @@ print(X_test.shape)
 predicted_stock_price = model.predict(X_test)
 predicted_stock_price = sc.inverse_transform(predicted_stock_price)
 
+dates = df.loc[(training_num):,"dates"]#.values.reshape(-1,1)
+
 # Visualising the results
-plt.plot(df,dataset_test.values, color = "red", label = "Real TESLA Stock Price")
-plt.plot(df,predicted_stock_price, color = "blue", label = "Predicted TESLA Stock Price")
+plt.plot(dates,dataset_test.values[:,0], color = "red", label = "Real TESLA Stock Price")
+plt.plot(dates,predicted_stock_price, color = "blue", label = "Predicted TESLA Stock Price")
 plt.xticks(np.arange(0,459,50))
 plt.title('TESLA Stock Price Prediction')
 plt.xlabel('Time')
