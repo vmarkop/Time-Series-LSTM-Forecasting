@@ -1,6 +1,6 @@
 import sys
 # import math
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import keras
 import random
 import pandas as pd
@@ -129,11 +129,11 @@ X_test_pred = model.predict(X_test)
 test_mae_loss = np.mean(np.abs(X_test_pred - X_test), axis=1)
 
 
-test_score_df = pd.DataFrame(index=test[TIME_STEPS:].index) #test_score_df = pd.DataFrame(index=df[test_size+TIME_STEPS:len(df)].index)
+test_score_df = pd.DataFrame(index=range(TIME_STEPS+train_size,len(df)))
 test_score_df['loss'] = test_mae_loss
 test_score_df['threshold'] = THRESHOLD
 test_score_df['anomaly'] = test_score_df.loss > test_score_df.threshold
-test_score_df['close'] = test[TIME_STEPS:].close
+test_score_df['close'] = test[TIME_STEPS:]
 
 anomalies = test_score_df[test_score_df.anomaly == True]
 
