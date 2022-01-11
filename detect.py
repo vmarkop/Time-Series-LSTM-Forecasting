@@ -154,16 +154,14 @@ print("anomalies: ", len(anomalies))
 
 plt.plot(
     test[TIME_STEPS:].index,
-    # test_close_backup[TIME_STEPS:],
-    test[TIME_STEPS:].close,
-    # scaler.inverse_transform(test[TIME_STEPS:].close),
+    test_close_backup[TIME_STEPS:],
     label='close price'
 )
 
 if (len(anomalies)):
     sns.scatterplot(
         anomalies.index,
-        anomalies.close,
+        scaler.inverse_transform(anomalies)[:,3],
         color=sns.color_palette()[3],
         s=52,
         label='anomaly'
