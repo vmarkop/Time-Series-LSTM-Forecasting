@@ -91,7 +91,7 @@ for i in range(0,n):
     model.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
     # Fitting the RNN to the Training set
-    model.fit(X_train, y_train, epochs = 1, batch_size = 32)
+    model.fit(X_train, y_train, epochs = 50, batch_size = 32)
 
     # Getting the predicted stock price of 2017
     dataset_train = df.iloc[:training_num]
@@ -119,7 +119,7 @@ for i in range(0,n):
 
     plt.plot(range(0,df.size-training_num),dataset_test.values, color = "red", label = "Real " + stock + " stock price")
     plt.plot(range(0,df.size-training_num),predicted_stock_price, color = "blue", label = "Predicted " + stock + " stock price")
-    plt.xticks(np.arange(0,459,50))
+    plt.xticks(np.arange(0,750,50))
     plt.title(stock + ' Stock Price Prediction')
     plt.xlabel('Time')
     plt.ylabel(stock + ' Stock Price')

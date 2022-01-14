@@ -23,14 +23,6 @@ epochs = 100
 test_samples = 2000
 
 
-#BADUTILS
-startdate="01/01/2015"
-def mkdate(ts):
-    return datetime.datetime.fromtimestamp(
-        int(ts)
-    ).strftime('%Y-%m-%d')
-
-
 #Utils
 def plot_examples(stock_input, stock_decoded):
     n = 10  
@@ -66,142 +58,116 @@ def plot_history(history):
 
 
 
-# # Datasets retrieval & transformation
-# # get data
-# start_timestamp = time.mktime(datetime.datetime.strptime(startdate, "%d/%m/%Y").timetuple())
-# end_timestamp = int(time.time())
-# one_week = 3600*24*7 # s
-# one_day = 3600*24 # s
-# weeks = list(np.arange(start_timestamp, end_timestamp, one_week))
-# days_recorded = (datetime.datetime.fromtimestamp(end_timestamp)-datetime.datetime.fromtimestamp(start_timestamp)).days
-# print("days_recorded ",days_recorded)
-# data = []
-# if not os.path.isfile("data.pickle"):
-#     s = req.Session()
-#     r = s.get("https://www.coindesk.com/price/")
-#     for i in range(1, len(weeks)):
-#         start_weekday = mkdate(weeks[i-1])
-#         end_weekday = mkdate(weeks[i]-one_day)
-#         print(start_weekday, end_weekday)
-#         r = s.get("https://api.coindesk.com/charts/data?data=close&startdate={}&enddate={}&exchanges=bpi&dev=1&index=USD".format(start_weekday, end_weekday))
-#         ans = json.loads(r.text.replace("cb(", "").replace(");",""))["bpi"]
-#         ans.sort(key=lambda x: x[0])
-#         for pricepoint in ans:
-#             if pricepoint[0]/1000 >= weeks[i-1] and pricepoint[0]/1000 < (weeks[i]-one_day):
-#                 data.append([int(pricepoint[0]/1000), pricepoint[1]])
-                
-#     pickle.dump(data, open("./data.pickle", "wb"))
-# else:
-#     data = pickle.load(open("./data.pickle", "rb"))
-
-# df = pd.DataFrame(np.array(data)[:,1], columns=['price'])
-# df['pct_change'] = df.price.pct_change()
-# df['log_ret'] = np.log(df.price) - np.log(df.price.shift(1))
-
-# scaler = MinMaxScaler()
-# x_train_nonscaled = np.array([df['log_ret'].values[i-window_length:i].reshape(-1, 1) for i in tqdm(range(window_length+1,len(df['log_ret'])))])
-# x_train = np.array([scaler.fit_transform(df['log_ret'].values[i-window_length:i].reshape(-1, 1)) for i in tqdm(range(window_length+1,len(df['log_ret'])))])
-
-# x_test = x_train[-test_samples:]
-# x_train = x_train[:-test_samples]
-
-# x_train = x_train.astype('float32')
-# x_test = x_test.astype('float32')
-
-# plt.figure(figsize=(20,10))
-# plt.plot(np.array(data)[:,1])
-
-
 
 
 # Parsing input parameters
-if len(sys.argv) >= 3 and sys.argv[1] == "-d":
+if len(sys.argv) < 9:
+    print("Usage: python reduce.py -d <dataset> -q <queryset> -od <output_dataset_file> -oq <output_query_file>")
+    sys.exit()
+
+wrong_arg = False
+if sys.argv[1] == "-d":
     dataset = sys.argv[2]
 else:
-    print("Usage: python forecast.py -d <dataset> -n <number of time series selected> -all [optional]")
+    wrong_arg = True
+if sys.argv[3] == "-q":
+    queryset = sys.argv[4]
+else:
+    wrong_arg = True
+if sys.argv[5] == "-od":
+    data_out = sys.argv[6]
+    open(data_out, 'w').close()
+else:
+    wrong_arg = True
+if sys.argv[7] == "-oq":
+    query_out = sys.argv[8]
+    open(query_out, 'w').close()
+else:
+    wrong_arg = True
+
+if wrong_arg:
+    print("Usage: python reduce.py -d <dataset> -q <queryset> -od <output_dataset_file> -oq <output_query_file>")
     sys.exit()
-n = 1
-if len(sys.argv) >= 5 and sys.argv[3] == "-n":
-    n = int(sys.argv[4])
-all = True if len(sys.argv) > 5 and sys.argv[5] == "-all" else False
-
-dataframe = pd.read_csv(dataset,'\t',header=None).iloc[:,:]
-
-# Array to mark timeseries already printed
-selected_timeseries = []
-for i in range(0,n):
-    # Repeat until a timeseries that has not been printed is selected
-    while True:
-        ts = random.randint(0,len(dataframe)-1)
-        if ts not in selected_timeseries:
-            # Mark timeseries as selected and use in this iteration
-            selected_timeseries.append(ts)
-            break
-
-stock = dataframe.iloc[ts][0]
-timeseries = dataframe.iloc[ts,1:]
-timeseries = timeseries.values.reshape(-1,1)
-df = pd.DataFrame(timeseries, columns=['price'])
-df.price = df.price.astype('int')
-df['pct_change'] = df.price.pct_change()
-df['log_ret'] = np.log(df.price) - np.log(df.price.shift(1))
-
-scaler = MinMaxScaler()
-x_train_nonscaled = np.array([df['log_ret'].values[i-window_length:i].reshape(-1, 1) for i in tqdm(range(window_length+1,len(df['log_ret'])))])
-x_train = np.array([scaler.fit_transform(df['log_ret'].values[i-window_length:i].reshape(-1, 1)) for i in tqdm(range(window_length+1,len(df['log_ret'])))])
-
-x_test = x_train[-test_samples:]
-x_train = x_train[:-test_samples]
-
-x_train = x_train.astype('float32')
-x_test = x_test.astype('float32')
-
-plt.figure(figsize=(20,10))
-plt.plot(np.array(df)[:,1])
 
 
+def reduce(input_file, output_file):
+
+    dataframe = pd.read_csv(input_file,'\t',header=None).iloc[:,:]
+
+    for ts in range(len(dataframe)):
+
+        stock = dataframe.iloc[ts][0]
+        timeseries = dataframe.iloc[ts,1:]
+        timeseries = timeseries.values.reshape(-1,1)
+        df = pd.DataFrame(timeseries, columns=['price'])
+        df.price = df.price.astype('int')
+        df['pct_change'] = df.price.pct_change()
+        df['log_ret'] = np.log(df.price) - np.log(df.price.shift(1))
+
+        scaler = MinMaxScaler()
+        x_train_nonscaled = np.array([df['log_ret'].values[i-window_length:i].reshape(-1, 1) for i in tqdm(range(window_length+1,len(df['log_ret'])))])
+        x_train = np.array([scaler.fit_transform(df['log_ret'].values[i-window_length:i].reshape(-1, 1)) for i in tqdm(range(window_length+1,len(df['log_ret'])))])
+
+        x_test = x_train[-test_samples:]
+        x_train = x_train[:-test_samples]
+
+        x_train = x_train.astype('float32')
+        x_test = x_test.astype('float32')
 
 
+        # 1D Convolutional Autoencoder
+        print(len(x_train))
+        print(x_test.shape[1:])
+        print(np.prod(x_train.shape[1:]))
+        x_train_deep = x_train.reshape((len(x_train), int(np.prod(x_train.shape[1:]))))
+        x_test_deep = x_test.reshape((len(x_test), int(np.prod(x_test.shape[1:]))))
+        input_window = Input(shape=(window_length,1))
+        x = Conv1D(16, 3, activation="relu", padding="same")(input_window) # 10 dims
+        #x = BatchNormalization()(x)
+        x = MaxPooling1D(2, padding="same")(x) # 5 dims
+        x = Conv1D(1, 3, activation="relu", padding="same")(x) # 5 dims
+        #x = BatchNormalization()(x)
+        encoded = MaxPooling1D(2, padding="same")(x) # 3 dims
+
+        encoder = Model(input_window, encoded)
+
+        # 3 dimensions in the encoded layer
+
+        x = Conv1D(1, 3, activation="relu", padding="same")(encoded) # 3 dims
+        #x = BatchNormalization()(x)
+        x = UpSampling1D(2)(x) # 6 dims
+        x = Conv1D(16, 2, activation='relu')(x) # 5 dims
+        #x = BatchNormalization()(x)
+        x = UpSampling1D(2)(x) # 10 dims
+        decoded = Conv1D(1, 3, activation='sigmoid', padding='same')(x) # 10 dims
+        autoencoder = Model(input_window, decoded)
+        autoencoder.summary()
+
+        autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+        history = autoencoder.fit(x_train, x_train,
+                        epochs=epochs,
+                        batch_size=1024,
+                        shuffle=True,
+                        validation_data=(x_test, x_test))
+
+        decoded_stocks = autoencoder.predict(x_test)
 
 
-# 1D Convolutional Autoencoder
-print(len(x_train))
-print(x_test.shape[1:])
-print(np.prod(x_train.shape[1:]))
-x_train_deep = x_train.reshape((len(x_train), int(np.prod(x_train.shape[1:]))))
-x_test_deep = x_test.reshape((len(x_test), int(np.prod(x_test.shape[1:]))))
-input_window = Input(shape=(window_length,1))
-x = Conv1D(16, 3, activation="relu", padding="same")(input_window) # 10 dims
-#x = BatchNormalization()(x)
-x = MaxPooling1D(2, padding="same")(x) # 5 dims
-x = Conv1D(1, 3, activation="relu", padding="same")(x) # 5 dims
-#x = BatchNormalization()(x)
-encoded = MaxPooling1D(2, padding="same")(x) # 3 dims
+        output = open(output_file, "a")
+        output.write(stock)
+        for i in decoded_stocks[1]:
+            output.write('\t')
+            output.write(str(i[0]))
+        output.write('\n')
+        output.close()
 
-encoder = Model(input_window, encoded)
-
-# 3 dimensions in the encoded layer
-
-x = Conv1D(1, 3, activation="relu", padding="same")(encoded) # 3 dims
-#x = BatchNormalization()(x)
-x = UpSampling1D(2)(x) # 6 dims
-x = Conv1D(16, 2, activation='relu')(x) # 5 dims
-#x = BatchNormalization()(x)
-x = UpSampling1D(2)(x) # 10 dims
-decoded = Conv1D(1, 3, activation='sigmoid', padding='same')(x) # 10 dims
-autoencoder = Model(input_window, decoded)
-autoencoder.summary()
-
-autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
-history = autoencoder.fit(x_train, x_train,
-                epochs=epochs,
-                batch_size=1024,
-                shuffle=True,
-                validation_data=(x_test, x_test))
-
-decoded_stocks = autoencoder.predict(x_test)
+    plot_history(history)
+    plot_examples(x_test_deep, decoded_stocks)
+    plt.show()
 
 
-plot_history(history)
-plot_examples(x_test_deep, decoded_stocks)
-plt.show()
+# Produce output_dataset_file
+reduce(dataset,data_out)
+
+# Produce output_queryset_file
+reduce(queryset,query_out)
