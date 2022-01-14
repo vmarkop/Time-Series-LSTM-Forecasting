@@ -66,81 +66,35 @@ def plot_history(history):
 
 
 
-# Datasets retrieval & transformation
-# get data
-start_timestamp = time.mktime(datetime.datetime.strptime(startdate, "%d/%m/%Y").timetuple())
-end_timestamp = int(time.time())
-one_week = 3600*24*7 # s
-one_day = 3600*24 # s
-weeks = list(np.arange(start_timestamp, end_timestamp, one_week))
-days_recorded = (datetime.datetime.fromtimestamp(end_timestamp)-datetime.datetime.fromtimestamp(start_timestamp)).days
-print("days_recorded ",days_recorded)
-data = []
-if not os.path.isfile("data.pickle"):
-    s = req.Session()
-    r = s.get("https://www.coindesk.com/price/")
-    for i in range(1, len(weeks)):
-        start_weekday = mkdate(weeks[i-1])
-        end_weekday = mkdate(weeks[i]-one_day)
-        print(start_weekday, end_weekday)
-        r = s.get("https://api.coindesk.com/charts/data?data=close&startdate={}&enddate={}&exchanges=bpi&dev=1&index=USD".format(start_weekday, end_weekday))
-        ans = json.loads(r.text.replace("cb(", "").replace(");",""))["bpi"]
-        ans.sort(key=lambda x: x[0])
-        for pricepoint in ans:
-            if pricepoint[0]/1000 >= weeks[i-1] and pricepoint[0]/1000 < (weeks[i]-one_day):
-                data.append([int(pricepoint[0]/1000), pricepoint[1]])
+# # Datasets retrieval & transformation
+# # get data
+# start_timestamp = time.mktime(datetime.datetime.strptime(startdate, "%d/%m/%Y").timetuple())
+# end_timestamp = int(time.time())
+# one_week = 3600*24*7 # s
+# one_day = 3600*24 # s
+# weeks = list(np.arange(start_timestamp, end_timestamp, one_week))
+# days_recorded = (datetime.datetime.fromtimestamp(end_timestamp)-datetime.datetime.fromtimestamp(start_timestamp)).days
+# print("days_recorded ",days_recorded)
+# data = []
+# if not os.path.isfile("data.pickle"):
+#     s = req.Session()
+#     r = s.get("https://www.coindesk.com/price/")
+#     for i in range(1, len(weeks)):
+#         start_weekday = mkdate(weeks[i-1])
+#         end_weekday = mkdate(weeks[i]-one_day)
+#         print(start_weekday, end_weekday)
+#         r = s.get("https://api.coindesk.com/charts/data?data=close&startdate={}&enddate={}&exchanges=bpi&dev=1&index=USD".format(start_weekday, end_weekday))
+#         ans = json.loads(r.text.replace("cb(", "").replace(");",""))["bpi"]
+#         ans.sort(key=lambda x: x[0])
+#         for pricepoint in ans:
+#             if pricepoint[0]/1000 >= weeks[i-1] and pricepoint[0]/1000 < (weeks[i]-one_day):
+#                 data.append([int(pricepoint[0]/1000), pricepoint[1]])
                 
-    pickle.dump(data, open("./data.pickle", "wb"))
-else:
-    data = pickle.load(open("./data.pickle", "rb"))
-
-df = pd.DataFrame(np.array(data)[:,1], columns=['price'])
-df['pct_change'] = df.price.pct_change()
-df['log_ret'] = np.log(df.price) - np.log(df.price.shift(1))
-
-scaler = MinMaxScaler()
-x_train_nonscaled = np.array([df['log_ret'].values[i-window_length:i].reshape(-1, 1) for i in tqdm(range(window_length+1,len(df['log_ret'])))])
-x_train = np.array([scaler.fit_transform(df['log_ret'].values[i-window_length:i].reshape(-1, 1)) for i in tqdm(range(window_length+1,len(df['log_ret'])))])
-
-x_test = x_train[-test_samples:]
-x_train = x_train[:-test_samples]
-
-x_train = x_train.astype('float32')
-x_test = x_test.astype('float32')
-
-plt.figure(figsize=(20,10))
-plt.plot(np.array(data)[:,1])
-
-
-
-
-# # Parsing input parameters
-# if len(sys.argv) >= 3 and sys.argv[1] == "-d":
-#     dataset = sys.argv[2]
+#     pickle.dump(data, open("./data.pickle", "wb"))
 # else:
-#     print("Usage: python forecast.py -d <dataset> -n <number of time series selected> -all [optional]")
-#     sys.exit()
-# n = 1
-# if len(sys.argv) >= 5 and sys.argv[3] == "-n":
-#     n = int(sys.argv[4])
-# all = True if len(sys.argv) > 5 and sys.argv[5] == "-all" else False
+#     data = pickle.load(open("./data.pickle", "rb"))
 
-# dataframe = pd.read_csv(dataset,'\t',header=None).iloc[:,:]
-
-# # Array to mark timeseries already printed
-# selected_timeseries = []
-# for i in range(0,n):
-#     # Repeat until a timeseries that has not been printed is selected
-#     while True:
-#         ts = random.randint(0,len(dataframe)-1)
-#         if ts not in selected_timeseries:
-#             # Mark timeseries as selected and use in this iteration
-#             selected_timeseries.append(ts)
-#             break
-
-# stock = dataframe.iloc[ts][0]
-# timeseries = dataframe.iloc[ts,1:].T
-# df = pd.DataFrame(timeseries, columns=['price'])
+# df = pd.DataFrame(np.array(data)[:,1], columns=['price'])
 # df['pct_change'] = df.price.pct_change()
 # df['log_ret'] = np.log(df.price) - np.log(df.price.shift(1))
 
@@ -155,7 +109,55 @@ plt.plot(np.array(data)[:,1])
 # x_test = x_test.astype('float32')
 
 # plt.figure(figsize=(20,10))
-# plt.plot(np.array(df)[:,1])
+# plt.plot(np.array(data)[:,1])
+
+
+
+
+# Parsing input parameters
+if len(sys.argv) >= 3 and sys.argv[1] == "-d":
+    dataset = sys.argv[2]
+else:
+    print("Usage: python forecast.py -d <dataset> -n <number of time series selected> -all [optional]")
+    sys.exit()
+n = 1
+if len(sys.argv) >= 5 and sys.argv[3] == "-n":
+    n = int(sys.argv[4])
+all = True if len(sys.argv) > 5 and sys.argv[5] == "-all" else False
+
+dataframe = pd.read_csv(dataset,'\t',header=None).iloc[:,:]
+
+# Array to mark timeseries already printed
+selected_timeseries = []
+for i in range(0,n):
+    # Repeat until a timeseries that has not been printed is selected
+    while True:
+        ts = random.randint(0,len(dataframe)-1)
+        if ts not in selected_timeseries:
+            # Mark timeseries as selected and use in this iteration
+            selected_timeseries.append(ts)
+            break
+
+stock = dataframe.iloc[ts][0]
+timeseries = dataframe.iloc[ts,1:]
+timeseries = timeseries.values.reshape(-1,1)
+df = pd.DataFrame(timeseries, columns=['price'])
+df.price = df.price.astype('int')
+df['pct_change'] = df.price.pct_change()
+df['log_ret'] = np.log(df.price) - np.log(df.price.shift(1))
+
+scaler = MinMaxScaler()
+x_train_nonscaled = np.array([df['log_ret'].values[i-window_length:i].reshape(-1, 1) for i in tqdm(range(window_length+1,len(df['log_ret'])))])
+x_train = np.array([scaler.fit_transform(df['log_ret'].values[i-window_length:i].reshape(-1, 1)) for i in tqdm(range(window_length+1,len(df['log_ret'])))])
+
+x_test = x_train[-test_samples:]
+x_train = x_train[:-test_samples]
+
+x_train = x_train.astype('float32')
+x_test = x_test.astype('float32')
+
+plt.figure(figsize=(20,10))
+plt.plot(np.array(df)[:,1])
 
 
 
@@ -202,3 +204,4 @@ decoded_stocks = autoencoder.predict(x_test)
 
 plot_history(history)
 plot_examples(x_test_deep, decoded_stocks)
+plt.show()
