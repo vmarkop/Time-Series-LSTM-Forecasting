@@ -20,12 +20,14 @@ from keras.callbacks import EarlyStopping
 if len(sys.argv) >= 3 and sys.argv[1] == "-d":
     dataset = sys.argv[2]
 else:
-    print("Usage: python forecast.py -d <dataset> -n <number of time series selected> -all [optional]")
+    print("Usage: python forecast.py -d <dataset> -n <number of time series selected> -m <model directory>")
     sys.exit()
 n = 1
 if len(sys.argv) >= 5 and sys.argv[3] == "-n":
     n = int(sys.argv[4])
-all = True if len(sys.argv) > 5 and sys.argv[5] == "-all" else False
+saved_model = "models/smmodel"
+if len(sys.argv) >= 7 and sys.argv[5] == "-m":
+    saved_model = sys.argv[6]
 
 dataframe = pd.read_csv(dataset,'\t',header=None).iloc[:,:]
 
@@ -115,10 +117,15 @@ for i in range(0,n):
     predicted_stock_price = model.predict(X_test)
     predicted_stock_price = sc.inverse_transform(predicted_stock_price)
 
+    model_all = keras.models.load_model(saved_model)
+    predicted_all_stock_price = model_all.predict(X_test)
+    predicted_all_stock_price = sc.inverse_transform(predicted_all_stock_price)
+
     # Visualising the results
 
     plt.plot(range(0,df.size-training_num),dataset_test.values, color = "red", label = "Real " + stock + " stock price")
     plt.plot(range(0,df.size-training_num),predicted_stock_price, color = "blue", label = "Predicted " + stock + " stock price")
+    plt.plot(range(0,df.size-training_num),predicted_all_stock_price, color = "green", label = "Predicted " + stock + " stock price with model_all")
     plt.xticks(np.arange(0,750,50))
     plt.title(stock + ' Stock Price Prediction')
     plt.xlabel('Time')

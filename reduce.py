@@ -1,16 +1,8 @@
-from keras.layers import Input, Dense, Conv1D, MaxPooling1D, UpSampling1D, BatchNormalization, LSTM, RepeatVector
-from keras.models import Model
-# from keras.models import model_from_json
-# from keras import regularizers
+from keras.layers import Input, Conv1D, MaxPooling1D, UpSampling1D
+from keras.models import Model, load_model
 import sys
-import random
-import datetime
-import time
 import requests as req
-import json
 import pandas as pd
-import pickle
-import os
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from tqdm import tqdm
@@ -21,44 +13,6 @@ window_length = 10
 encoding_dim = 3
 epochs = 100
 test_samples = 300
-
-
-#Utils
-def plot_examples(stock_input, stock_decoded):
-    n = 10  
-    plt.figure(figsize=(20, 4))
-    for i, idx in enumerate(list(np.arange(0, test_samples, 200))):
-        # display original
-        ax = plt.subplot(2, n, i + 1)
-        if i == 0:
-            ax.set_ylabel("Input", fontweight=600)
-        else:
-            ax.get_yaxis().set_visible(False)
-        plt.plot(stock_input[idx])
-        ax.get_xaxis().set_visible(False)
-        
-
-        # display reconstruction
-        ax = plt.subplot(2, n, i + 1 + n)
-        if i == 0:
-            ax.set_ylabel("Output", fontweight=600)
-        else:
-            ax.get_yaxis().set_visible(False)
-        plt.plot(stock_decoded[idx])
-        ax.get_xaxis().set_visible(False)
-
-def plot_history(history):
-    plt.figure(figsize=(15, 5))
-    ax = plt.subplot(1, 2, 1)
-    plt.plot(history.history["loss"])
-    plt.title("Train loss")
-    ax = plt.subplot(1, 2, 2)
-    plt.plot(history.history["val_loss"])
-    plt.title("Test loss")
-
-
-
-
 
 # Parsing input parameters
 if len(sys.argv) < 9:
@@ -84,9 +38,13 @@ if sys.argv[7] == "-oq":
     open(query_out, 'w').close()
 else:
     wrong_arg = True
+saved_model = "models/model_reduce"
+if len(sys.argv) >= 11:
+    if sys.argv[9] == "-m":
+        saved_model = sys.argv[10]
 
 if wrong_arg:
-    print("Usage: python reduce.py -d <dataset> -q <queryset> -od <output_dataset_file> -oq <output_query_file>")
+    print("Usage: python reduce.py -d <dataset> -q <queryset> -od <output_dataset_file> -oq <output_query_file> -m <model directory>")
     sys.exit()
 
 
@@ -130,7 +88,6 @@ def reduce(input_file, output_file):
         encoded = MaxPooling1D(2, padding="same")(x) # 3 dims
 
         encoder = Model(input_window, encoded)
-
         # 3 dimensions in the encoded layer
 
         x = Conv1D(1, 3, activation="relu", padding="same")(encoded) # 3 dims
@@ -140,18 +97,9 @@ def reduce(input_file, output_file):
         #x = BatchNormalization()(x)
         x = UpSampling1D(2)(x) # 10 dims
         decoded = Conv1D(1, 3, activation='sigmoid', padding='same')(x) # 10 dims
-        autoencoder = Model(input_window, decoded)
-        autoencoder.summary()
 
-        autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
-        history = autoencoder.fit(x_train, x_train,
-                        epochs=epochs,
-                        batch_size=1024,
-                        shuffle=True,
-                        validation_data=(x_test, x_test))
-
+        autoencoder = load_model(saved_model)
         decoded_stocks = autoencoder.predict(x_test)
-
 
         output = open(output_file, "a")
         output.write(stock)
@@ -161,12 +109,6 @@ def reduce(input_file, output_file):
                 output.write(str(j[0]))
         output.write('\n')
         output.close()
-
-    print(decoded_stocks.shape)
-    plot_history(history)
-    plot_examples(x_test_deep, decoded_stocks)
-    plt.show()
-
 
 # Produce output_dataset_file
 reduce(dataset,data_out)

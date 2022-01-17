@@ -97,7 +97,7 @@ def reduce(input_file, output_file):
     autoencoder = Model()
 
 
-    for ts in range(len(dataframe)):
+    for ts in range(10):
 
         stock = dataframe.iloc[ts][0]
         timeseries = dataframe.iloc[ts,1:]
@@ -156,7 +156,7 @@ def reduce(input_file, output_file):
                         shuffle=True,
                         validation_data=(x_test, x_test))
 
-        decoded_stocks = autoencoder.predict(x_test)
+        # decoded_stocks = autoencoder.predict(x_test)
 
 
         # output = open(output_file, "a")

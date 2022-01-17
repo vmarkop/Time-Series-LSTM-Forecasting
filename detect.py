@@ -12,12 +12,17 @@ from sklearn.preprocessing import StandardScaler
 if len(sys.argv) >= 3 and sys.argv[1] == "-d":
     dataset = sys.argv[2]
 else:
-    print("Usage: python forecast.py -d <dataset> -n <number of time series selected> -all [optional]")
+    print("Usage: detect.py –d <dataset> -n <number of time series selected> -mae <error value as double> -m <model directory>")
     sys.exit()
 n = 1
 if len(sys.argv) >= 5 and sys.argv[3] == "-n":
     n = int(sys.argv[4])
-all = True if len(sys.argv) > 5 and sys.argv[5] == "-all" else False
+mae = 1.0
+if len(sys.argv) >= 7 and sys.argv[5] == "-mae":
+    mae = sys.argv[6]
+saved_model = "models/model_detect"
+if len(sys.argv) >= 9 and sys.argv[7] == "-m":
+    saved_model = sys.argv[8]
 
 dataframe = pd.read_csv(dataset,'\t',header=None).iloc[:,:]
 
@@ -92,33 +97,7 @@ for i in range(0,n):
     print(X_train.shape)
 
 
-
-
-    model = keras.Sequential()
-    model.add(keras.layers.LSTM(
-        units=64,
-        input_shape=(X_train.shape[1], X_train.shape[2])
-    ))
-
-    model.add(keras.layers.Dropout(rate=0.2))
-    model.add(keras.layers.RepeatVector(n=X_train.shape[1]))
-    model.add(keras.layers.LSTM(units=64, return_sequences=True))
-    model.add(keras.layers.Dropout(rate=0.2))
-    model.add(
-    keras.layers.TimeDistributed(
-        keras.layers.Dense(units=X_train.shape[2])
-    )
-    )
-    model.compile(loss='mae', optimizer='adam')
-
-
-    history = model.fit(
-        X_train, y_train,
-        epochs=10,
-        batch_size=32,
-        validation_split=0.1,
-        shuffle=False
-    )
+    model = keras.models.load_model(saved_model)
 
 
     X_train_pred = model.predict(X_train)
