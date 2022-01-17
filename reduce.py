@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 window_length = 10
 encoding_dim = 3
 epochs = 100
-test_samples = 2000
+test_samples = 300
 
 
 #Utils
@@ -155,12 +155,14 @@ def reduce(input_file, output_file):
 
         output = open(output_file, "a")
         output.write(stock)
-        for i in decoded_stocks[1]:
-            output.write('\t')
-            output.write(str(i[0]))
+        for i in decoded_stocks:
+            for j in i:
+                output.write('\t')
+                output.write(str(j[0]))
         output.write('\n')
         output.close()
 
+    print(decoded_stocks.shape)
     plot_history(history)
     plot_examples(x_test_deep, decoded_stocks)
     plt.show()
