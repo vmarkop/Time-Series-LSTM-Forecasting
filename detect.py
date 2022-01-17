@@ -17,7 +17,7 @@ else:
 n = 1
 if len(sys.argv) >= 5 and sys.argv[3] == "-n":
     n = int(sys.argv[4])
-mae = 1.0
+mae = 0.65
 if len(sys.argv) >= 7 and sys.argv[5] == "-mae":
     mae = sys.argv[6]
 saved_model = "models/model_detect"
@@ -103,7 +103,7 @@ for i in range(0,n):
     X_train_pred = model.predict(X_train)
     train_mae_loss = np.mean(np.abs(X_train_pred - X_train), axis=1)
 
-    THRESHOLD = 0.65
+    THRESHOLD = mae
 
 
     X_test_pred = model.predict(X_test)
