@@ -20,38 +20,17 @@ import os
 # os.add_dll_directory("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.2/bin")
 
 # Parsing input parameters
-if len(sys.argv) >= 3 and sys.argv[1] == "-d":
+if len(sys.argv) >= 5 and sys.argv[1] == "-d" and sys.argv[3] == "-o":
     dataset = sys.argv[2]
+    output = sys.argv[4]
 else:
-    print("Usage: python forecast.py -d <dataset> -n <number of time series selected> -all [optional]")
+    print("Usage: python forecast_trainall.py -d <dataset> -o <output>")
     sys.exit()
-n = 1
-# if len(sys.argv) >= 5 and sys.argv[3] == "-n":
-#     n = int(sys.argv[4])
-# all = True if len(sys.argv) > 5 and sys.argv[5] == "-all" else False
 
 dataframe = pd.read_csv(dataset,'\t',header=None).iloc[:,:]
-print(dataframe.shape)
-# sys.exit()
-# keep first 80% of each stock
-# dataframe = dataframe.iloc[:, :int(len(dataframe.columns)*0.8)]
-print(dataframe.shape)
-# sys.exit()
-
 model = Sequential()
 
-# Array to mark timeseries already printed
-# selected_timeseries = []
 for ts in range(0, len(dataframe)):
-    # Repeat until a timeseries that has not been printed is selected
-    # while True:
-    #     ts = random.randint(0,len(dataframe)-1)
-    #     if ts not in selected_timeseries:
-    #         # Mark timeseries as selected and use in this iteration
-    #         selected_timeseries.append(ts)
-    #         break
-
-    print(ts)
     stock = dataframe.iloc[ts][0]
     df = dataframe.iloc[ts,1:]
     training_num = math.ceil(df.size*0.8)
@@ -79,7 +58,6 @@ for ts in range(0, len(dataframe)):
 
     # Only execute on first loop iteration
     if ts == 0:
-        #model = Sequential()
 
         #Adding the first LSTM layer and some Dropout regularisation
         model.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
@@ -106,40 +84,8 @@ for ts in range(0, len(dataframe)):
     # Fitting the RNN to the Training set
     model.fit(X_train, y_train, epochs = 50, batch_size = 32)
 
-model.save('smmodel')
+    # Backup every 50 timeseries
+    if ts % 50 == 0:
+        model.save(output)
 
-    # Getting the predicted stock price of 2017
-dataset_train = df.iloc[:training_num]
-dataset_test = df.iloc[training_num:]
-
-dataset_total = pd.concat((dataset_train, dataset_test), axis = 0)
-
-inputs = dataset_total[len(dataset_total) - len(dataset_test) - 60:].values
-
-inputs = inputs.reshape(-1,1)
-inputs = sc.transform(inputs)
-X_test = []
-for i in range(60, 790):
-    X_test.append(inputs[i-60:i, 0])
-X_test = np.array(X_test)
-print(X_test.shape)
-X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
-
-print(X_test.shape)
-# (459, 60, 1)
-
-predicted_stock_price = model.predict(X_test)
-predicted_stock_price = sc.inverse_transform(predicted_stock_price)
-
-    # Visualising the results
-
-
-
-plt.plot(range(0,df.size-training_num),dataset_test.values, color = "red", label = "Real " + stock + " stock price")
-plt.plot(range(0,df.size-training_num),predicted_stock_price, color = "blue", label = "Predicted " + stock + " stock price")
-plt.xticks(np.arange(0,750,50))
-plt.title(stock + ' Stock Price Prediction')
-plt.xlabel('Time')
-plt.ylabel(stock + ' Stock Price')
-plt.legend()
-plt.show()
+model.save(output)

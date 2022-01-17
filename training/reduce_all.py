@@ -1,16 +1,8 @@
-from keras.layers import Input, Dense, Conv1D, MaxPooling1D, UpSampling1D, BatchNormalization, LSTM, RepeatVector
+from keras.layers import Input, Conv1D, MaxPooling1D, UpSampling1D
 from keras.models import Model
-# from keras.models import model_from_json
-# from keras import regularizers
 import sys
-import random
-import datetime
-import time
 import requests as req
-import json
 import pandas as pd
-import pickle
-import os
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from tqdm import tqdm
@@ -20,73 +12,14 @@ import matplotlib.pyplot as plt
 window_length = 10
 encoding_dim = 3
 epochs = 100
-test_samples = 2000
-
-
-#Utils
-def plot_examples(stock_input, stock_decoded):
-    n = 10  
-    plt.figure(figsize=(20, 4))
-    for i, idx in enumerate(list(np.arange(0, test_samples, 200))):
-        # display original
-        ax = plt.subplot(2, n, i + 1)
-        if i == 0:
-            ax.set_ylabel("Input", fontweight=600)
-        else:
-            ax.get_yaxis().set_visible(False)
-        plt.plot(stock_input[idx])
-        ax.get_xaxis().set_visible(False)
-        
-
-        # display reconstruction
-        ax = plt.subplot(2, n, i + 1 + n)
-        if i == 0:
-            ax.set_ylabel("Output", fontweight=600)
-        else:
-            ax.get_yaxis().set_visible(False)
-        plt.plot(stock_decoded[idx])
-        ax.get_xaxis().set_visible(False)
-
-def plot_history(history):
-    plt.figure(figsize=(15, 5))
-    ax = plt.subplot(1, 2, 1)
-    plt.plot(history.history["loss"])
-    plt.title("Train loss")
-    ax = plt.subplot(1, 2, 2)
-    plt.plot(history.history["val_loss"])
-    plt.title("Test loss")
-
-
-
-
+test_samples = 300
 
 # Parsing input parameters
-if len(sys.argv) < 9:
-    print("Usage: python reduce.py -d <dataset> -q <queryset> -od <output_dataset_file> -oq <output_query_file>")
-    sys.exit()
-
-wrong_arg = False
-if sys.argv[1] == "-d":
+if len(sys.argv) >= 5 and sys.argv[1] == "-d" and sys.argv[3] == "-o":
     dataset = sys.argv[2]
+    output = sys.argv[4]
 else:
-    wrong_arg = True
-if sys.argv[3] == "-q":
-    queryset = sys.argv[4]
-else:
-    wrong_arg = True
-if sys.argv[5] == "-od":
-    data_out = sys.argv[6]
-    open(data_out, 'w').close()
-else:
-    wrong_arg = True
-if sys.argv[7] == "-oq":
-    query_out = sys.argv[8]
-    open(query_out, 'w').close()
-else:
-    wrong_arg = True
-
-if wrong_arg:
-    print("Usage: python reduce.py -d <dataset> -q <queryset> -od <output_dataset_file> -oq <output_query_file>")
+    print("Usage: python reduce_trainall.py -d <dataset> -o <output>")
     sys.exit()
 
 
@@ -97,9 +30,8 @@ def reduce(input_file, output_file):
     autoencoder = Model()
 
 
-    for ts in range(10):
+    for ts in range(0, len(dataframe)):
 
-        stock = dataframe.iloc[ts][0]
         timeseries = dataframe.iloc[ts,1:]
         timeseries = timeseries.values.reshape(-1,1)
         df = pd.DataFrame(timeseries, columns=['price'])
@@ -156,24 +88,12 @@ def reduce(input_file, output_file):
                         shuffle=True,
                         validation_data=(x_test, x_test))
 
-        # decoded_stocks = autoencoder.predict(x_test)
+
+        # Backup every 50 timeseries
+        if ts % 50 == 0:
+            autoencoder.save(output)
+
+    autoencoder.save(output)
 
 
-        # output = open(output_file, "a")
-        # output.write(stock)
-        # for i in decoded_stocks[1]:
-        #     output.write('\t')
-        #     output.write(str(i[0]))
-        # output.write('\n')
-        # output.close()
-
-    # plot_history(history)
-    # plot_examples(x_test_deep, decoded_stocks)
-    # plt.show()
-    autoencoder.save('model_reduce')
-
-# Produce output_dataset_file
-reduce(dataset,data_out)
-
-# Produce output_queryset_file
-# reduce(queryset,query_out)
+reduce(dataset,"None")

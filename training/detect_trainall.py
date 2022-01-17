@@ -9,30 +9,19 @@ from sklearn.preprocessing import StandardScaler
 
 
 # Parsing input parameters
-if len(sys.argv) >= 3 and sys.argv[1] == "-d":
+if len(sys.argv) >= 5 and sys.argv[1] == "-d" and sys.argv[3] == "-o":
     dataset = sys.argv[2]
+    output = sys.argv[4]
 else:
-    print("Usage: python forecast.py -d <dataset> -n <number of time series selected> -all [optional]")
+    print("Usage: python detect_trainall.py -d <dataset> -o <output>")
     sys.exit()
-# n = 1
-# if len(sys.argv) >= 5 and sys.argv[3] == "-n":
-#     n = int(sys.argv[4])
-# all = True if len(sys.argv) > 5 and sys.argv[5] == "-all" else False
 
 dataframe = pd.read_csv(dataset,'\t',header=None).iloc[:,:]
 
 model = keras.Sequential()
 
-# Array to mark timeseries already printed
 selected_timeseries = []
-for ts in range(0, 50):
-    # Repeat until a timeseries that has not been printed is selected
-    # while True:
-    #     ts = random.randint(0,len(dataframe)-1)
-    #     if ts not in selected_timeseries:
-    #         # Mark timeseries as selected and use in this iteration
-    #         selected_timeseries.append(ts)
-    #         break
+for ts in range(0, len(dataframe)):
 
     stock = dataframe.iloc[ts][0]
     timeseries = dataframe.iloc[ts,1:]
@@ -93,11 +82,7 @@ for ts in range(0, 50):
 
     print(X_train.shape)
 
-
-
-
-    # model = keras.Sequential()
-
+    # Initialize model on first iteration
     if ts == 0:
         model.add(keras.layers.LSTM(
             units=64,
@@ -124,45 +109,8 @@ for ts in range(0, 50):
         shuffle=False
     )
 
-model.save('model_detect')
+    # Backup every 50 timeseries
+    if ts % 50 == 0:
+        model.save(output)
 
-
-    # X_train_pred = model.predict(X_train)
-    # train_mae_loss = np.mean(np.abs(X_train_pred - X_train), axis=1)
-
-    # THRESHOLD = 0.65
-
-
-    # X_test_pred = model.predict(X_test)
-    # test_mae_loss = np.mean(np.abs(X_test_pred - X_test), axis=1)
-
-
-    # test_score_df = pd.DataFrame(index=test[TIME_STEPS:].index)
-    # test_score_df['loss'] = test_mae_loss
-    # test_score_df['threshold'] = THRESHOLD
-    # test_score_df['anomaly'] = test_score_df.loss > test_score_df.threshold
-    # test_score_df['close'] = test[TIME_STEPS:].close
-
-    # anomalies = test_score_df[test_score_df.anomaly == True]
-
-    # print("anomalies: ", len(anomalies))
-
-    # plt.plot(
-    #     test[TIME_STEPS:].index,
-    #     test_close_backup[TIME_STEPS:],
-    #     label='close price'
-    # )
-
-    # if (len(anomalies)):
-    #     sns.scatterplot(
-    #         anomalies.index,
-    #         scaler.inverse_transform(anomalies)[:,3],
-    #         color=sns.color_palette()[3],
-    #         s=52,
-    #         label='anomaly'
-    #     )
-
-    # plt.xticks(rotation=25)
-    # plt.title(stock + ' Stock Anomaly Detection')
-    # plt.legend()
-    # plt.show()
+model.save(output)
