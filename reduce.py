@@ -65,6 +65,7 @@ def reduce(input_file, output_file):
         scaler = MinMaxScaler()
         x_train_nonscaled = np.array([df['log_ret'].values[i-window_length:i].reshape(-1, 1) for i in tqdm(range(window_length+1,len(df['log_ret'])))])
         x_train = np.array([scaler.fit_transform(df['log_ret'].values[i-window_length:i].reshape(-1, 1)) for i in tqdm(range(window_length+1,len(df['log_ret'])))])
+        x_train = np.array([scaler.fit_transform(df['price'].values[i-window_length:i].reshape(-1, 1)) for i in tqdm(range(window_length+1,len(df['price'])))])
 
         x_test = x_train[-test_samples:]
         x_train = x_train[:-test_samples]
@@ -100,13 +101,15 @@ def reduce(input_file, output_file):
 
         autoencoder = load_model(saved_model)
         decoded_stocks = autoencoder.predict(x_test)
+        decoded_stocks = decoded_stocks.reshape(-1,1)
+        decoded_stocks = scaler.inverse_transform(decoded_stocks)
 
         output = open(output_file, "a")
         output.write(stock)
         for i in decoded_stocks:
-            for j in i:
+            # for j in i:
                 output.write('\t')
-                output.write(str(j[0]))
+                output.write(str(i[0]))
         output.write('\n')
         output.close()
 

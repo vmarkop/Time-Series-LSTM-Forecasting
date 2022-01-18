@@ -12,14 +12,14 @@ from sklearn.preprocessing import StandardScaler
 if len(sys.argv) >= 3 and sys.argv[1] == "-d":
     dataset = sys.argv[2]
 else:
-    print("Usage: detect.py –d <dataset> -n <number of time series selected> -mae <error value as double> -m <model directory>")
+    print("Usage: detect.py -d <dataset> -n <number of time series selected> -mae <error value as double> -m <model directory>")
     sys.exit()
 n = 1
 if len(sys.argv) >= 5 and sys.argv[3] == "-n":
     n = int(sys.argv[4])
 mae = 0.65
 if len(sys.argv) >= 7 and sys.argv[5] == "-mae":
-    mae = sys.argv[6]
+    mae = float(sys.argv[6])
 saved_model = "models/model_detect"
 if len(sys.argv) >= 9 and sys.argv[7] == "-m":
     saved_model = sys.argv[8]

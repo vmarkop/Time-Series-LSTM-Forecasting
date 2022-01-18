@@ -36,12 +36,11 @@ def reduce(input_file, output_file):
         timeseries = timeseries.values.reshape(-1,1)
         df = pd.DataFrame(timeseries, columns=['price'])
         df.price = df.price.astype('int')
-        df['pct_change'] = df.price.pct_change()
-        df['log_ret'] = np.log(df.price) - np.log(df.price.shift(1))
+        # df['pct_change'] = df.price.pct_change()
+        # df['log_ret'] = np.log(df.price) - np.log(df.price.shift(1))
 
         scaler = MinMaxScaler()
-        x_train_nonscaled = np.array([df['log_ret'].values[i-window_length:i].reshape(-1, 1) for i in tqdm(range(window_length+1,len(df['log_ret'])))])
-        x_train = np.array([scaler.fit_transform(df['log_ret'].values[i-window_length:i].reshape(-1, 1)) for i in tqdm(range(window_length+1,len(df['log_ret'])))])
+        x_train = np.array([scaler.fit_transform(df['price'].values[i-window_length:i].reshape(-1, 1)) for i in tqdm(range(window_length+1,len(df['price'])))])
 
         x_test = x_train[-test_samples:]
         x_train = x_train[:-test_samples]
@@ -51,29 +50,17 @@ def reduce(input_file, output_file):
 
 
         # 1D Convolutional Autoencoder
-        print(len(x_train))
-        print(x_test.shape[1:])
-        print(np.prod(x_train.shape[1:]))
-        x_train_deep = x_train.reshape((len(x_train), int(np.prod(x_train.shape[1:]))))
-        x_test_deep = x_test.reshape((len(x_test), int(np.prod(x_test.shape[1:]))))
         input_window = Input(shape=(window_length,1))
         x = Conv1D(16, 3, activation="relu", padding="same")(input_window) # 10 dims
-        #x = BatchNormalization()(x)
         x = MaxPooling1D(2, padding="same")(x) # 5 dims
         x = Conv1D(1, 3, activation="relu", padding="same")(x) # 5 dims
-        #x = BatchNormalization()(x)
         encoded = MaxPooling1D(2, padding="same")(x) # 3 dims
-
-        if ts == 0:
-            encoder = Model(input_window, encoded)
 
         # 3 dimensions in the encoded layer
 
         x = Conv1D(1, 3, activation="relu", padding="same")(encoded) # 3 dims
-        #x = BatchNormalization()(x)
         x = UpSampling1D(2)(x) # 6 dims
         x = Conv1D(16, 2, activation='relu')(x) # 5 dims
-        #x = BatchNormalization()(x)
         x = UpSampling1D(2)(x) # 10 dims
         decoded = Conv1D(1, 3, activation='sigmoid', padding='same')(x) # 10 dims
         
