@@ -61,41 +61,22 @@ def reduce(input_file, output_file):
         df.price = df.price.astype('int')
 
         scaler = MinMaxScaler()
-        x_train = np.array([scaler.fit_transform(df['price'].values[i-window_length:i].reshape(-1, 1)) for i in tqdm(range(window_length+1,len(df['price'])))])
+        x_before_train = scaler.fit_transform(df['price'].values.reshape(-1,1))
 
-        x_test = x_train[-test_samples:]
-        x_train = x_train[:-test_samples]
-
-        x_train = x_train.astype('float32')
-        x_test = x_test.astype('float32')
-
-
+        x_timeseries = np.array([x_before_train[i-window_length:i] for i in tqdm(range(window_length+1,len(df['price']),window_length))])
+        
         # 1D Convolutional Autoencoder
-        input_window = Input(shape=(window_length,1))
-        x = Conv1D(16, 3, activation="relu", padding="same")(input_window) # 10 dims
-        x = MaxPooling1D(2, padding="same")(x) # 5 dims
-        x = Conv1D(1, 3, activation="relu", padding="same")(x) # 5 dims
-        encoded = MaxPooling1D(2, padding="same")(x) # 3 dims
+        encoder = load_model("model_encoder")
 
-        encoder = Model(input_window, encoded)
-        # 3 dimensions in the encoded layer
-
-        x = Conv1D(1, 3, activation="relu", padding="same")(encoded) # 3 dims
-        x = UpSampling1D(2)(x) # 6 dims
-        x = Conv1D(16, 2, activation='relu')(x) # 5 dims
-        x = UpSampling1D(2)(x) # 10 dims
-        decoded = Conv1D(1, 3, activation='sigmoid', padding='same')(x) # 10 dims
-
-        autoencoder = load_model(saved_model)
-        decoded_stocks = autoencoder.predict(x_test)
-        decoded_stocks = decoded_stocks.reshape(-1,1)
-        decoded_stocks = scaler.inverse_transform(decoded_stocks)
+        encoded_stock = encoder.predict(x_timeseries)
+        encoded_stock = encoded_stock.reshape(1,-1)
+        encoded_stock = scaler.inverse_transform(encoded_stock)
 
         output = open(output_file, "a")
         output.write(stock)
-        for i in decoded_stocks:
+        for i in encoded_stock[0]:
             output.write('\t')
-            output.write(str(i[0]))
+            output.write(str(i))
         output.write('\n')
         output.close()
 
