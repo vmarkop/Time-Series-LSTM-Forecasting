@@ -25,7 +25,7 @@ if len(sys.argv) >= 7:
     output_history = sys.argv[6]
 
 else:
-    print("Usage: python reduce_trainall.py -d <dataset> -o <output>")
+    print("Usage: python reduce_trainall.py -d <dataset> -o <outputs>")
     sys.exit()
 
 
@@ -94,6 +94,6 @@ for ts in range(0, len(dataframe)):
 encoder.save(output_encoder)
 autoencoder.save(output_autoencoder)
 
-history_file = open('important', 'wb')
-pickle.dump(history.history, output_history)
-history_file.close()
+# history_file = open('important', 'wb')
+# pickle.dump(history.history, output_history)
+# history_file.close()

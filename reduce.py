@@ -66,7 +66,7 @@ def reduce(input_file, output_file):
         x_timeseries = np.array([x_before_train[i-window_length:i] for i in tqdm(range(window_length+1,len(df['price']),window_length))])
         
         # 1D Convolutional Autoencoder
-        encoder = load_model("model_encoder")
+        encoder = load_model("model_enc")
 
         encoded_stock = encoder.predict(x_timeseries)
         encoded_stock = encoded_stock.reshape(1,-1)
@@ -79,6 +79,16 @@ def reduce(input_file, output_file):
             output.write(str(i))
         output.write('\n')
         output.close()
+
+        # Visualising the results
+        plt.plot(range(3650),df['price'].values, color = 'red', label = 'Real TESLA Stock Price')
+        plt.plot(range(1092),encoded_stock.reshape(-1,1), color = 'blue', label = 'Reduced TESLA Stock Price')
+        plt.xticks(np.arange(0,3650,365))
+        plt.title('TESLA Stock Price Prediction')
+        plt.xlabel('Time')
+        plt.ylabel('TESLA Stock Price')
+        plt.legend()
+        plt.show()
 
 # Produce output_dataset_file
 reduce(dataset,data_out)
