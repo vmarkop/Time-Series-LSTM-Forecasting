@@ -81,14 +81,14 @@ def reduce(input_file, output_file):
         output.close()
 
         # Visualising the results
-        plt.plot(range(3650),df['price'].values, color = 'red', label = 'Real TESLA Stock Price')
-        plt.plot(range(1092),encoded_stock.reshape(-1,1), color = 'blue', label = 'Reduced TESLA Stock Price')
-        plt.xticks(np.arange(0,3650,365))
-        plt.title('TESLA Stock Price Prediction')
-        plt.xlabel('Time')
-        plt.ylabel('TESLA Stock Price')
-        plt.legend()
-        plt.show()
+        # plt.plot(range(3650),df['price'].values, color = 'red', label = 'Real TESLA Stock Price')
+        # plt.plot(range(1092),encoded_stock.reshape(-1,1), color = 'blue', label = 'Reduced TESLA Stock Price')
+        # plt.xticks(np.arange(0,3650,365))
+        # plt.title('TESLA Stock Price Prediction')
+        # plt.xlabel('Time')
+        # plt.ylabel('TESLA Stock Price')
+        # plt.legend()
+        # plt.show()
 
 # Produce output_dataset_file
 reduce(dataset,data_out)
