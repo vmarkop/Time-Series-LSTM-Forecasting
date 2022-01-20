@@ -1,0 +1,10 @@
+Query: x
+Algorithm: LSH_Frechet_Discrete
+Approximate Nearest neighbor: utx
+True Nearest neighbor: bb
+distanceApproximate: 119.761
+distanceTrue: 52.6946
+
+tApproximateAverage: 3.377s
+tTrueAverage: 78.178s
+MAF: 2.27275

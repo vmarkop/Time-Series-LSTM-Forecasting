@@ -1,0 +1,10 @@
+Query: x
+Algorithm: LSH_Freshet_Continuous
+Approximate Nearest neighbor: etr
+True Nearest neighbor: rig
+distanceApproximate: 53.0693
+distanceTrue: 35.3594
+
+tApproximateAverage: 7.386s
+tTrueAverage: 5.959s
+MAF: 1.50086

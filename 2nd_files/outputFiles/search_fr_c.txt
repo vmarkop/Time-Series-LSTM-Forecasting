@@ -1,0 +1,10 @@
+Query: x
+Algorithm: LSH_Freshet_Continuous
+Approximate Nearest neighbor: afl
+True Nearest neighbor: bb
+distanceApproximate: 96.02
+distanceTrue: 52.6946
+
+tApproximateAverage: 113.665s
+tTrueAverage: 79.024s
+MAF: 1.8222
