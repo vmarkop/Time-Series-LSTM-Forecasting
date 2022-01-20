@@ -1,0 +1,73 @@
+Query: x
+Algorithm: Hypercube
+Approximate Nearest neighbor: rig
+True Nearest neighbor: rig
+distanceApproximate: 436.912
+distanceTrue: 436.912
+
+Query: xel
+Algorithm: Hypercube
+Approximate Nearest neighbor: t
+True Nearest neighbor: t
+distanceApproximate: 75.4056
+distanceTrue: 75.4056
+
+Query: xl
+Algorithm: Hypercube
+Approximate Nearest neighbor: sti
+True Nearest neighbor: sti
+distanceApproximate: 222.039
+distanceTrue: 222.039
+
+Query: xlnx
+Algorithm: Hypercube
+Approximate Nearest neighbor: msft
+True Nearest neighbor: msft
+distanceApproximate: 136.178
+distanceTrue: 136.178
+
+Query: xom
+Algorithm: Hypercube
+Approximate Nearest neighbor: etr
+True Nearest neighbor: pg
+distanceApproximate: 238.308
+distanceTrue: 178.984
+
+Query: xray
+Algorithm: Hypercube
+Approximate Nearest neighbor: pcg
+True Nearest neighbor: pcg
+distanceApproximate: 90.0899
+distanceTrue: 90.0899
+
+Query: xrx
+Algorithm: Hypercube
+Approximate Nearest neighbor: fe
+True Nearest neighbor: fe
+distanceApproximate: 212.913
+distanceTrue: 212.913
+
+Query: yum
+Algorithm: Hypercube
+Approximate Nearest neighbor: gis
+True Nearest neighbor: gis
+distanceApproximate: 135.156
+distanceTrue: 135.156
+
+Query: zbh
+Algorithm: Hypercube
+Approximate Nearest neighbor: cb
+True Nearest neighbor: ups
+distanceApproximate: 449.73
+distanceTrue: 243.353
+
+Query: zion
+Algorithm: Hypercube
+Approximate Nearest neighbor: sti
+True Nearest neighbor: sti
+distanceApproximate: 133.024
+distanceTrue: 133.024
+
+tApproximateAverage: 0.005s
+tTrueAverage: 0s
+MAF: 1.84805

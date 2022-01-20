@@ -1,0 +1,10 @@
+Query: x
+Algorithm: LSH_Frechet_Discrete
+Approximate Nearest neighbor: nue
+True Nearest neighbor: rig
+distanceApproximate: 79.8214
+distanceTrue: 35.3594
+
+tApproximateAverage: 0.26s
+tTrueAverage: 5.966s
+MAF: 2.25743

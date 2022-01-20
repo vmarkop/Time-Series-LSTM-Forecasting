@@ -1,0 +1,73 @@
+Query: x
+Algorithm: LSH_Vector
+Approximate Nearest neighbor: all
+True Nearest neighbor: rig
+distanceApproximate: 812.504
+distanceTrue: 436.912
+
+Query: xel
+Algorithm: LSH_Vector
+Approximate Nearest neighbor: ca
+True Nearest neighbor: t
+distanceApproximate: 142.33
+distanceTrue: 75.4056
+
+Query: xl
+Algorithm: LSH_Vector
+Approximate Nearest neighbor: ccl
+True Nearest neighbor: sti
+distanceApproximate: 348.601
+distanceTrue: 222.039
+
+Query: xlnx
+Algorithm: LSH_Vector
+Approximate Nearest neighbor: an
+True Nearest neighbor: msft
+distanceApproximate: 206.891
+distanceTrue: 136.178
+
+Query: xom
+Algorithm: LSH_Vector
+Approximate Nearest neighbor: ppg
+True Nearest neighbor: pg
+distanceApproximate: 531.726
+distanceTrue: 178.984
+
+Query: xray
+Algorithm: LSH_Vector
+Approximate Nearest neighbor: nue
+True Nearest neighbor: pcg
+distanceApproximate: 211.265
+distanceTrue: 90.0899
+
+Query: xrx
+Algorithm: LSH_Vector
+Approximate Nearest neighbor: syy
+True Nearest neighbor: fe
+distanceApproximate: 339.388
+distanceTrue: 212.913
+
+Query: yum
+Algorithm: LSH_Vector
+Approximate Nearest neighbor: pki
+True Nearest neighbor: gis
+distanceApproximate: 198.891
+distanceTrue: 135.156
+
+Query: zbh
+Algorithm: LSH_Vector
+Approximate Nearest neighbor: kmb
+True Nearest neighbor: ups
+distanceApproximate: 282.428
+distanceTrue: 243.353
+
+Query: zion
+Algorithm: LSH_Vector
+Approximate Nearest neighbor: dwdp
+True Nearest neighbor: sti
+distanceApproximate: 439.069
+distanceTrue: 133.024
+
+tApproximateAverage: 0s
+tTrueAverage: 0s
+MAF: 3.30068
