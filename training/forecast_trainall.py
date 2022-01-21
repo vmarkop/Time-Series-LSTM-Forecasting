@@ -34,9 +34,13 @@ for ts in range(0, len(dataframe)):
     stock = dataframe.iloc[ts][0]
     df = dataframe.iloc[ts,1:]
     training_num = math.ceil(df.size*0.8)
-    print(training_num)
-    print("Number of rows and columns:", df.shape)
-    print(df.head(5))
+    testing_num = df.size - training_num
+
+    # Training variables
+    lookback = 60
+    batch_size_num = 64
+    epoch_num = 40
+    unit_num = 50
 
     training_set = df.iloc[:training_num].values
     test_set     = df.iloc[training_num:].values
@@ -48,31 +52,31 @@ for ts in range(0, len(dataframe)):
     # Creating a data structure with 60 time-steps and 1 output
     X_train = []
     y_train = []
-    for i in range(60, 800):
-        X_train.append(training_set_scaled[i-60:i, 0])
+    for i in range(lookback, training_num):
+        X_train.append(training_set_scaled[i-lookback:i, 0])
         y_train.append(training_set_scaled[i, 0])
     X_train, y_train = np.array(X_train), np.array(y_train)
 
     X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
-    #(740, 60, 1)
+    #(training_num-lookback, lookback, 1)
 
     # Only execute on first loop iteration
     if ts == 0:
 
         #Adding the first LSTM layer and some Dropout regularisation
-        model.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
+        model.add(LSTM(units = unit_num, return_sequences = True, input_shape = (X_train.shape[1], 1)))
         model.add(Dropout(0.2))
 
         # Adding a second LSTM layer and some Dropout regularisation
-        model.add(LSTM(units = 50, return_sequences = True))
+        model.add(LSTM(units = unit_num, return_sequences = True))
         model.add(Dropout(0.2))
 
         # Adding a third LSTM layer and some Dropout regularisation
-        model.add(LSTM(units = 50, return_sequences = True))
+        model.add(LSTM(units = unit_num, return_sequences = True))
         model.add(Dropout(0.2))
 
         # Adding a fourth LSTM layer and some Dropout regularisation
-        model.add(LSTM(units = 50))
+        model.add(LSTM(units = unit_num))
         model.add(Dropout(0.2))
 
         # Adding the output layer
@@ -82,7 +86,7 @@ for ts in range(0, len(dataframe)):
         model.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
     # Fitting the RNN to the Training set
-    model.fit(X_train, y_train, epochs = 50, batch_size = 32)
+    model.fit(X_train, y_train, epochs = epoch_num, batch_size = batch_size_num)
 
     # Backup every 50 timeseries
     if ts % 50 == 0:

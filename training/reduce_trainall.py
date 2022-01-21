@@ -42,8 +42,6 @@ for ts in range(0, len(dataframe)):
     timeseries = timeseries.values.reshape(-1,1)
     df = pd.DataFrame(timeseries, columns=['price'])
     df.price = df.price.astype('int')
-    # df['pct_change'] = df.price.pct_change()
-    # df['log_ret'] = np.log(df.price) - np.log(df.price.shift(1))
 
     scaler = MinMaxScaler()
     x_train = np.array([scaler.fit_transform(df['price'].values[i-window_length:i].reshape(-1, 1)) for i in tqdm(range(window_length+1,len(df['price'])))])
@@ -77,7 +75,6 @@ for ts in range(0, len(dataframe)):
         autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
     autoencoder.summary()
 
-    # autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
     history = autoencoder.fit(x_train, x_train,
                     epochs=epochs,
                     batch_size=1024,

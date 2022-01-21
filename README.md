@@ -59,3 +59,10 @@ LSH Vector - Vector
 
 Hypercube - Vector
 ./bin/cluster.out -i input/dataset.csv -c input/cluster.conf -o outputFiles/reduced_cluster_hypercube.txt -assignment Hypercube -update Mean_Vector -silhouette
+
+
+Α) 
+`python forecast.py -d <dataset> -n <number of time series selected> [-m <model directory>] [-noself] [-nomodel]`
+
+temp_model bad!
+dont forget maybe to add layers back!
