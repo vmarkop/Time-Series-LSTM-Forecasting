@@ -39,7 +39,7 @@ if sys.argv[7] == "-oq":
     open(query_out, 'w').close()
 else:
     wrong_arg = True
-saved_model = "models/model_reduce"
+saved_model = "models/model_reduce_enc"
 if len(sys.argv) >= 11:
     if sys.argv[9] == "-m":
         saved_model = sys.argv[10]
@@ -70,7 +70,7 @@ def reduce(input_file, output_file):
         x_timeseries = np.array([x_before_train[i-window_length:i] for i in tqdm(range(window_length+1,len(df['price']),window_length))])
         
         # 1D Convolutional Autoencoder
-        encoder = load_model("model_enc")
+        encoder = load_model(saved_model)
 
         encoded_stock = encoder.predict(x_timeseries)
         encoded_stock = encoded_stock.reshape(1,-1)

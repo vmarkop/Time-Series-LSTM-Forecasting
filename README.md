@@ -71,7 +71,7 @@ By default, θα εκτελεστούν και οι δύο προβλέψεις.
 
 Το όρισμα εκτέλεσης -m ακολουθείται από τη διαδρομή του αποθηκευμένου μοντέλου που θα χρησιμοποιηθεί.
 
-Γρήγορη εκτέλεση: `python3 reduce.py -d input/nasdaq2007_17_dataset.csv -q input/nasdaq2007_17_queryset.csv -od out/reduced_dataset -oq out/reduced_queryset -m models/model_reduce_encode`
+Γρήγορη εκτέλεση: `python3 reduce.py -d input/nasdaq2007_17_dataset.csv -q input/nasdaq2007_17_queryset.csv -od out/reduced_dataset -oq out/reduced_queryset -m models/model_reduce_enc`
 
 
 

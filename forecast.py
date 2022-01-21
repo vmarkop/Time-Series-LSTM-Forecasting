@@ -87,12 +87,12 @@ for i in range(0,n):
         model.add(Dropout(0.2))
 
         # Adding a second LSTM layer and some Dropout regularisation
-        # model.add(LSTM(units = unit_num, return_sequences = True))
-        # model.add(Dropout(0.2))
+        model.add(LSTM(units = unit_num, return_sequences = True))
+        model.add(Dropout(0.2))
 
         # Adding a third LSTM layer and some Dropout regularisation
-        # model.add(LSTM(units = unit_num, return_sequences = True))
-        # model.add(Dropout(0.2))
+        model.add(LSTM(units = unit_num, return_sequences = True))
+        model.add(Dropout(0.2))
 
         # Adding a fourth LSTM layer and some Dropout regularisation
         model.add(LSTM(units = unit_num))
