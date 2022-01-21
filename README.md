@@ -6,6 +6,8 @@
 ### Ιωάννης Γεωργόπουλος, 1115201800026
 ### Βασίλειος Μαρκόπουλος, 1115201800108
 
+### [Git Repository](https://github.com/vmarkop/Time-Series-LSTM-Forecasting)
+
 
 
 # Περιγραφή Λειτουργίας
