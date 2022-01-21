@@ -16,10 +16,11 @@ test_samples = 300
 
 # Parsing input parameters
 if len(sys.argv) < 9:
-    print("Usage: python reduce.py -d <dataset> -q <queryset> -od <output_dataset_file> -oq <output_query_file> -m <model directory>")
+    print("Usage: python reduce.py -d <dataset> -q <queryset> -od <output_dataset_file> -oq <output_query_file> -m <model directory> [-novis]")
     sys.exit()
 
 wrong_arg = False
+novis = False
 if sys.argv[1] == "-d":
     dataset = sys.argv[2]
 else:
@@ -42,6 +43,9 @@ saved_model = "models/model_reduce"
 if len(sys.argv) >= 11:
     if sys.argv[9] == "-m":
         saved_model = sys.argv[10]
+    if len(sys.argv) >= 12:
+        if sys.argv[11] == "-novis":
+            novis = True
 
 if wrong_arg:
     print("Usage: python reduce.py -d <dataset> -q <queryset> -od <output_dataset_file> -oq <output_query_file> -m <model directory>")
@@ -81,14 +85,15 @@ def reduce(input_file, output_file):
         output.close()
 
         # Visualising the results
-        plt.plot(range(3650),df['price'].values, color = 'red', label = 'Real ' + stock + ' Stock Price')
-        plt.plot(range(1092),encoded_stock.reshape(-1,1), color = 'blue', label = 'Reduced ' + stock + ' Stock Price')
-        plt.xticks(np.arange(0,3650,365))
-        plt.title(stock + ' Stock Price Prediction')
-        plt.xlabel('Time')
-        plt.ylabel(stock + ' Stock Price')
-        plt.legend()
-        plt.show()
+        if not novis:
+            plt.plot(range(3650),df['price'].values, color = 'red', label = 'Real ' + stock + ' Stock Price')
+            plt.plot(range(1092),encoded_stock.reshape(-1,1), color = 'blue', label = 'Reduced ' + stock + ' Stock Price')
+            plt.xticks(np.arange(0,3650,365))
+            plt.title(stock + ' Stock Price Prediction')
+            plt.xlabel('Time')
+            plt.ylabel(stock + ' Stock Price')
+            plt.legend()
+            plt.show()
 
 # Produce output_dataset_file
 reduce(dataset,data_out)

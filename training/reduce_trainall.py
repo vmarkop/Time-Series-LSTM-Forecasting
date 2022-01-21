@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-import pickle
+# import pickle
 
 # Parameters
 window_length = 10
@@ -19,14 +19,16 @@ test_samples = 300
 if len(sys.argv) >= 5 and sys.argv[1] == "-d" and sys.argv[3] == "-o":
     dataset = sys.argv[2]
     output_encoder = sys.argv[4]
-if len(sys.argv) >= 6:
-    output_autoencoder = sys.argv[5]
-if len(sys.argv) >= 7:
-    output_history = sys.argv[6]
-
 else:
     print("Usage: python reduce_trainall.py -d <dataset> -o <outputs>")
     sys.exit()
+if len(sys.argv) >= 6:
+    output_autoencoder = sys.argv[5]
+else:
+    print("Usage: python reduce_trainall.py -d <dataset> -o <outputs>")
+    sys.exit()
+if len(sys.argv) >= 7:
+    output_history = sys.argv[6]
 
 
 

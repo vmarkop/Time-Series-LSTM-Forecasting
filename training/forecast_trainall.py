@@ -38,8 +38,8 @@ for ts in range(0, len(dataframe)):
 
     # Training variables
     lookback = 60
-    batch_size_num = 64
-    epoch_num = 40
+    batch_size_num = 70
+    epoch_num = 45
     unit_num = 50
 
     training_set = df.iloc[:training_num].values

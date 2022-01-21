@@ -8,6 +8,24 @@ import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 
 
+# Parameters
+TIME_STEPS = 30
+unit_num = 64
+batch_size_num = 64
+epochs_num = 40
+
+# Util
+def create_dataset(X, y, time_steps=1):
+        Xs, ys = [], [] 
+
+        for i in range(len(X) - time_steps):
+            v = X.iloc[i:(i + time_steps)].values
+            Xs.append(v)
+            ys.append(y.iloc[i + time_steps])
+
+        return np.array(Xs), np.array(ys)
+
+
 # Parsing input parameters
 if len(sys.argv) >= 5 and sys.argv[1] == "-d" and sys.argv[3] == "-o":
     dataset = sys.argv[2]
@@ -51,19 +69,6 @@ for ts in range(0, len(dataframe)):
 
     print(test[['close']].shape)
 
-    def create_dataset(X, y, time_steps=1):
-        Xs, ys = [], [] 
-
-        for i in range(len(X) - time_steps):
-            v = X.iloc[i:(i + time_steps)].values
-            Xs.append(v)
-            ys.append(y.iloc[i + time_steps])
-
-        return np.array(Xs), np.array(ys)
-
-
-    TIME_STEPS = 30
-
     # reshape to [samples, time_steps, n_features]
 
     print(train.shape)
@@ -85,13 +90,13 @@ for ts in range(0, len(dataframe)):
     # Initialize model on first iteration
     if ts == 0:
         model.add(keras.layers.LSTM(
-            units=64,
+            units=unit_num,
             input_shape=(X_train.shape[1], X_train.shape[2])
         ))
 
         model.add(keras.layers.Dropout(rate=0.2))
         model.add(keras.layers.RepeatVector(n=X_train.shape[1]))
-        model.add(keras.layers.LSTM(units=64, return_sequences=True))
+        model.add(keras.layers.LSTM(units=unit_num, return_sequences=True))
         model.add(keras.layers.Dropout(rate=0.2))
         model.add(
         keras.layers.TimeDistributed(
@@ -103,8 +108,8 @@ for ts in range(0, len(dataframe)):
 
     history = model.fit(
         X_train, y_train,
-        epochs=10,
-        batch_size=32,
+        epochs=epochs_num,
+        batch_size=batch_size_num,
         validation_split=0.1,
         shuffle=False
     )
